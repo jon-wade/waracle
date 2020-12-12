@@ -66,20 +66,18 @@ functions:
           method: delete
           cors: true
 
-
-
 resources:
   Resources:
     DataTable:
       Type: AWS::DynamoDB::Table
       Properties:
         AttributeDefinitions:
-          - AttributeName: name
-            AttributeType: S
+          - AttributeName: id
+            AttributeType: N
           - AttributeName: sk
             AttributeType: S
         KeySchema:
-          - AttributeName: name
+          - AttributeName: id
             KeyType: HASH
           - AttributeName: sk
             KeyType: RANGE

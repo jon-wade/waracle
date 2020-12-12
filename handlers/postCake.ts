@@ -1,6 +1,6 @@
 import { Handler, APIGatewayProxyEvent } from 'aws-lambda';
 import { Cake } from '../types'
-import {validationError, success, internalError} from '../helpers/responses'
+import { validationError, created, internalError } from '../helpers/responses'
 import { getClient } from '../config/db'
 
 const postCake: Handler = async (event: APIGatewayProxyEvent) => {
@@ -54,7 +54,7 @@ const postCake: Handler = async (event: APIGatewayProxyEvent) => {
         return getClient().put(putParams, (err) => {
             if (err && err.statusCode === 400) resolve(validationError('record already exists'))
             else if (err) resolve(internalError(err.message))
-            else resolve(success())
+            else resolve(created())
         })
     })
 

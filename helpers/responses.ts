@@ -27,4 +27,13 @@ const success = (message?: string | null): Response => ({
   }
 })
 
-export { validationError, internalError, success }
+const created = (message?: string | null): Response => ({
+  statusCode: 201,
+  body: message || 'ok',
+  headers: {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Credentials': true,
+  }
+})
+
+export { validationError, internalError, success, created }
