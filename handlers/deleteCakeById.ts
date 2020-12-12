@@ -1,7 +1,6 @@
-import { Handler, APIGatewayProxyEvent } from 'aws-lambda';
+import { Handler, APIGatewayProxyEvent } from 'aws-lambda'
 import { internalError, success, validationError } from '../helpers/responses'
 import { getClient } from '../config/db'
-
 
 const deleteCakeById: Handler = async (event: APIGatewayProxyEvent) => {
     const { pathParameters } = event
@@ -20,7 +19,7 @@ const deleteCakeById: Handler = async (event: APIGatewayProxyEvent) => {
     }
 
     return new Promise((resolve) => {
-        return getClient().delete(params, (err) => {
+        return getClient().delete(params, (err, data) => {
             if (err) resolve(internalError(err.message))
             else resolve(success())
         })
