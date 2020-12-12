@@ -10,7 +10,7 @@ const putCakeById: Handler = (event: APIGatewayProxyEvent, context: Context, cal
             'Access-Control-Allow-Credentials': true,
         }
     };
-    callback(undefined, response);
+    callback(undefined, response)
 };
 
 export { putCakeById }

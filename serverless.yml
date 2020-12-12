@@ -57,14 +57,14 @@ functions:
           path: cakes/{id}
           method: put
           cors: true
-#
-#  deleteCakeById:
-#    handler: index.deleteCakeById
-#    events:
-#      - http:
-#          path: cakes/{id}
-#          method: delete
-#          cors: true
+
+  deleteCakeById:
+    handler: index.deleteCakeById
+    events:
+      - http:
+          path: cakes/{id}
+          method: delete
+          cors: true
 
 
 
@@ -74,12 +74,12 @@ resources:
       Type: AWS::DynamoDB::Table
       Properties:
         AttributeDefinitions:
-          - AttributeName: id
-            AttributeType: N
+          - AttributeName: name
+            AttributeType: S
           - AttributeName: sk
-            AttributeType: N
+            AttributeType: S
         KeySchema:
-          - AttributeName: id
+          - AttributeName: name
             KeyType: HASH
           - AttributeName: sk
             KeyType: RANGE

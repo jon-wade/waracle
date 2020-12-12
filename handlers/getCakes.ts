@@ -10,7 +10,7 @@ const getCakes: Handler = (event: APIGatewayProxyEvent, context: Context, callba
             'Access-Control-Allow-Credentials': true,
         }
     };
-    callback(undefined, response);
+    callback(undefined, response)
 };
 
 export { getCakes }

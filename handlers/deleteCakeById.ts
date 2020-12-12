@@ -10,7 +10,7 @@ const deleteCakeById: Handler = (event: APIGatewayProxyEvent, context: Context, 
             'Access-Control-Allow-Credentials': true,
         }
     };
-    callback(undefined, response);
+    callback(undefined, response)
 };
 
 export { deleteCakeById }
