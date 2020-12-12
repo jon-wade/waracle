@@ -17,6 +17,7 @@ provider:
         - dynamodb:BatchGetItem
       Resource:
         - arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/data
+        - arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/data/index/*
 
 plugins:
   - serverless-plugin-typescript
@@ -81,6 +82,16 @@ resources:
             KeyType: HASH
           - AttributeName: sk
             KeyType: RANGE
+        GlobalSecondaryIndexes:
+          - IndexName: GSI-sk
+            KeySchema:
+              - AttributeName: sk
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
         TableName: data
         ProvisionedThroughput:
           ReadCapacityUnits: 1
