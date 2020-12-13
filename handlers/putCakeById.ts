@@ -2,6 +2,7 @@ import { Handler, APIGatewayProxyEvent } from 'aws-lambda'
 import { internalError, success, validationError } from '../helpers/responses'
 import { getClient } from '../config/db'
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
+import { getNameCheckParams } from '../helpers/getNameCheckParams'
 
 const putCakeById: Handler = async (event: APIGatewayProxyEvent) => {
     const { pathParameters, body } = event
@@ -59,20 +60,7 @@ const putCakeById: Handler = async (event: APIGatewayProxyEvent) => {
 
     // check if a cake with the proposed name already exists in the db before
     // attempting the update
-    const params: DocumentClient.QueryInput = {
-        TableName: 'data',
-        IndexName: `GSI-sk`,
-        KeyConditionExpression: '#hashKey = :hashKey',
-        FilterExpression: '#name = :name',
-        ExpressionAttributeNames: {
-            '#hashKey': 'sk',
-            '#name': 'name'
-        },
-        ExpressionAttributeValues: {
-            ':hashKey': `CAKE`,
-            ':name': name
-        }
-    }
+    const queryParams = getNameCheckParams(name);
 
     let updateExpStr = 'SET #version = if_not_exists(#version, :zero) + :incr, '
 
@@ -118,7 +106,7 @@ const putCakeById: Handler = async (event: APIGatewayProxyEvent) => {
     return new Promise((resolve) => {
         const db = getClient()
         if (name) {
-            return db.query(params, (err, data) => {
+            return db.query(queryParams, (err, data) => {
                 if (err) return resolve(internalError(err.message))
                 if (data.Items && data.Items.length) {
                     // names are unique in the db so the Items array should

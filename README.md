@@ -54,7 +54,7 @@ proven and time and money is available. The agile way!
 ###Testing
 The application has been unit and e2e tested. In the time available, I've added a basic e2e and unit test suite to
 demonstrate skills in those areas. Coverage is not extensive at this point, and would be improved with more time. I've
-picked the most complex endpoints to test, taking an approach of coverage at the points of greatest risk rather than
-chasing a coverage target.
+picked the one of the most complex endpoint to test, taking an approach of coverage at the points of greatest risk 
+rather than chasing a coverage target.
 ###Summary
 Thanks for the opportunity to demonstrate my skills, I've enjoyed working on it. Look forward to your feedback.

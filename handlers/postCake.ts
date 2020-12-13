@@ -2,6 +2,7 @@ import { Handler, APIGatewayProxyEvent } from 'aws-lambda'
 import { Cake } from '../types'
 import { validationError, created, internalError } from '../helpers/responses'
 import { getClient } from '../config/db'
+import { getNameCheckParams } from '../helpers/getNameCheckParams'
 
 const postCake: Handler = async (event: APIGatewayProxyEvent) => {
     const { body } = event
@@ -52,6 +53,7 @@ const postCake: Handler = async (event: APIGatewayProxyEvent) => {
     }
 
     const now = new Date().toISOString()
+    const db = getClient()
 
     const putParams = {
         TableName: 'data',
@@ -62,18 +64,41 @@ const postCake: Handler = async (event: APIGatewayProxyEvent) => {
             updatedAt: now,
             version: 1
         },
-        ConditionExpression: 'attribute_not_exists(#name)',
-        ExpressionAttributeNames: {
-            '#name': 'name'
-        }
+        ConditionExpression: 'attribute_not_exists(id)'
     }
 
+    const queryParams = getNameCheckParams(name)
+
     return new Promise((resolve) => {
-        return getClient().put(putParams, (err) => {
-            if (err && err.statusCode === 400)
-                return resolve(validationError('record already exists'))
-            else if (err) return resolve(internalError(err.message))
-            else return resolve(created())
+        return db.query(queryParams, (err, data) => {
+            if (err) return resolve(internalError(err.message))
+            if (data.Items && data.Items.length) {
+                // names are unique in the db so the Items array should
+                // only have one item within it
+                if (data.Items.length > 1)
+                    return resolve(
+                        internalError('duplicate named cakes found in db')
+                    )
+                if (data.Items[0].id !== id)
+                    return resolve(
+                        validationError(
+                            'a cake with this name already exists'
+                        )
+                    )
+                return db.put(putParams, (err) => {
+                    if (err && err.statusCode === 400)
+                        return resolve(validationError('record already exists'))
+                    else if (err) return resolve(internalError(err.message))
+                    else return resolve(created())
+                })
+            } else {
+                return db.put(putParams, (err) => {
+                    if (err && err.statusCode === 400)
+                        return resolve(validationError('record already exists'))
+                    else if (err) return resolve(internalError(err.message))
+                    else return resolve(created())
+                })
+            }
         })
     })
 }
