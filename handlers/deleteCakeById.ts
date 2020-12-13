@@ -4,7 +4,8 @@ import { getClient } from '../config/db'
 
 const deleteCakeById: Handler = async (event: APIGatewayProxyEvent) => {
     const { pathParameters } = event
-    if (!pathParameters) return validationError('pathParameters missing from request')
+    if (!pathParameters)
+        return validationError('pathParameters missing from request')
 
     const id = pathParameters.id
     if (!id) return validationError('no id in pathParameters')
@@ -19,11 +20,11 @@ const deleteCakeById: Handler = async (event: APIGatewayProxyEvent) => {
     }
 
     return new Promise((resolve) => {
-        return getClient().delete(params, (err, data) => {
+        return getClient().delete(params, (err) => {
             if (err) resolve(internalError(err.message))
             else resolve(success())
         })
     })
-};
+}
 
 export { deleteCakeById }

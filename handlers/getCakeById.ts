@@ -4,7 +4,8 @@ import { getClient } from '../config/db'
 
 const getCakeById: Handler = async (event: APIGatewayProxyEvent) => {
     const { pathParameters } = event
-    if (!pathParameters) return validationError('pathParameters missing from request')
+    if (!pathParameters)
+        return validationError('pathParameters missing from request')
 
     const id = pathParameters.id
     if (!id) return validationError('no id in pathParameters')
@@ -21,10 +22,11 @@ const getCakeById: Handler = async (event: APIGatewayProxyEvent) => {
     return new Promise((resolve) => {
         return getClient().get(params, (err, data) => {
             if (err) resolve(internalError(err.message))
-            if (!data.Item) resolve(validationError('no cake with the requested id'))
+            if (!data.Item)
+                resolve(validationError('no cake with the requested id'))
             else resolve(success(JSON.stringify(data.Item)))
         })
     })
-};
+}
 
 export { getCakeById }
