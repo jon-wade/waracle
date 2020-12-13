@@ -57,19 +57,19 @@ const putCakeById: Handler = async (event: APIGatewayProxyEvent) => {
         updatePropertyArr.push(['imageUrl', imageUrl])
     }
 
-    // check if a cake with the proposed name already exists in the db
+    // check if a cake with the proposed name already exists in the db before
+    // attempting the update
     const params: DocumentClient.QueryInput = {
         TableName: 'data',
-        KeyConditionExpression: '#hashKey = :hashKey and #rangeKey = :rangeKey',
+        IndexName: `GSI-sk`,
+        KeyConditionExpression: '#hashKey = :hashKey',
+        FilterExpression: '#name = :name',
         ExpressionAttributeNames: {
-            '#hashKey': 'id',
-            '#rangeKey': 'sk',
+            '#hashKey': 'sk',
             '#name': 'name'
         },
-        FilterExpression: '#name = :name',
         ExpressionAttributeValues: {
-            ':hashKey': Number(id),
-            ':rangeKey': 'CAKE',
+            ':hashKey': `CAKE`,
             ':name': name
         }
     }
@@ -106,27 +106,52 @@ const putCakeById: Handler = async (event: APIGatewayProxyEvent) => {
     const updateParams: DocumentClient.UpdateItemInput = {
         TableName: 'data',
         Key: {
-            id,
+            id: Number(id),
             sk: 'CAKE'
         },
         UpdateExpression: updateExpStr,
         ExpressionAttributeNames: expNamesObj,
-        ExpressionAttributeValues: expValuesObj
+        ExpressionAttributeValues: expValuesObj,
+        ConditionExpression: 'attribute_exists(id)'
     }
 
     return new Promise((resolve) => {
         const db = getClient()
-        db.query(params, (err, data) => {
-            if (err) return resolve(internalError(err.message))
-            if (data.Items && data.Items.length)
-                return resolve(
-                    validationError('a cake with this name already exists')
-                )
-            db.update(updateParams, (err) => {
+        if (name) {
+            return db.query(params, (err, data) => {
                 if (err) return resolve(internalError(err.message))
+                if (data.Items && data.Items.length) {
+                    // names are unique in the db so the Items array should
+                    // only have one item within it
+                    if (data.Items.length > 1)
+                        return resolve(
+                            internalError('duplicate named cakes found in db')
+                        )
+                    if (data.Items[0].id !== Number(id))
+                        return resolve(
+                            validationError(
+                                'a cake with this name already exists'
+                            )
+                        )
+                    return db.update(updateParams, (err) => {
+                        if (err && err.statusCode === 400)
+                            return resolve(
+                                validationError('no matching record exists')
+                            )
+                        else if (err) return resolve(internalError(err.message))
+                        return resolve(success())
+                    })
+                }
+            })
+        } else {
+            // we don't need to check the name in this case
+            return db.update(updateParams, (err) => {
+                if (err && err.statusCode === 400)
+                    resolve(validationError('no matching record exists'))
+                else if (err) return resolve(internalError(err.message))
                 return resolve(success())
             })
-        })
+        }
     })
 }
 

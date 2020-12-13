@@ -71,9 +71,9 @@ const postCake: Handler = async (event: APIGatewayProxyEvent) => {
     return new Promise((resolve) => {
         return getClient().put(putParams, (err) => {
             if (err && err.statusCode === 400)
-                resolve(validationError('record already exists'))
-            else if (err) resolve(internalError(err.message))
-            else resolve(created())
+                return resolve(validationError('record already exists'))
+            else if (err) return resolve(internalError(err.message))
+            else return resolve(created())
         })
     })
 }
