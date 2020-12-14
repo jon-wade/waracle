@@ -1,5 +1,5 @@
-#Waracle-Test
-###Endpoints
+# Waracle-Test
+### Endpoints
 GET - https://en62yw2j7f.execute-api.eu-west-1.amazonaws.com/test/cakes
 
 GET - https://en62yw2j7f.execute-api.eu-west-1.amazonaws.com/test/cakes/{id}
@@ -32,10 +32,10 @@ Example payload
 DELETE - https://en62yw2j7f.execute-api.eu-west-1.amazonaws.com/test/cakes/{id}
 
 
-###Source Control
+### Source Control
 The application is held in `git` source control and has had small regular commits added
 during the course of development. The remote repository is available on Github.
-###Framework/Architecture
+### Framework/Architecture
 I used the serverless framework, TypeScript, AWS and DynamoDb for the following reasons:
 * The architecture provides a pure pay-for-usage model with no fixed overheads for the infrastructure and built-in scalability.
 * Tight integration between Serverless, Lambda and Dynamo provides opportunities to
@@ -73,7 +73,7 @@ discounted architectures.
 
 However, speed to market to get initial feedback on the product is preferable to a perfect architecture from the get-go
 in my opinion. Migrations can always occur once business models are proven and time and money is available. The agile way!
-###Testing
+### Testing
 The application has been unit and e2e tested to a limited extent. In the time available, I've added a basic e2e and unit
 test suite to demonstrate skills in those areas. Coverage is not extensive at this point. I've picked the `POST /cakes` 
 endpoint to test as it is one of the most complex. The e2e test suite calls the stage endpoints and writes to Dynamo. 
@@ -84,10 +84,10 @@ tests at runtime:
 
 `npm run test:e2e` and `npm run test:unit`
 
-###TODO
+### TODO
 With more time, further validation could be added (for instance checking that the `imageUrl` is valid), improvements
 could be made to test coverage, more refactoring of common code into shared helpers and adding of endpoint documentation
 via Swagger or equivalent.
 
-###Summary
+### Summary
 Thanks for the opportunity to demonstrate my skills, I've enjoyed working on the exercise. Look forward to your feedback.
