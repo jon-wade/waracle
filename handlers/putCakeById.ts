@@ -105,8 +105,6 @@ const putCakeById: Handler = async (event: APIGatewayProxyEvent) => {
         ConditionExpression: 'attribute_exists(id)'
     }
 
-    console.log('updateParams', updateParams)
-
     return new Promise((resolve) => {
         const updateCake = () => {
             return db.update(updateParams, (err) => {
