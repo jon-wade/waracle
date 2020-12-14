@@ -1,6 +1,6 @@
 import { Handler, APIGatewayProxyEvent } from 'aws-lambda'
-import { internalError, success, validationError } from '../helpers/responses'
-import { getClient } from '../config/db'
+import { internalError, validationError } from '../helpers/responses'
+import * as dc from '../config/db'
 
 const getCakeById: Handler = async (event: APIGatewayProxyEvent) => {
     const { pathParameters } = event
@@ -19,12 +19,20 @@ const getCakeById: Handler = async (event: APIGatewayProxyEvent) => {
         }
     }
 
+    const db = dc.getClient()
     return new Promise((resolve) => {
-        return getClient().get(params, (err, data) => {
-            if (err) resolve(internalError(err.message))
+        return db.get(params, (err, data) => {
+            if (err) return resolve(internalError(err.message))
             if (!data.Item)
-                resolve(validationError('no cake with the requested id'))
-            else resolve(success(JSON.stringify(data.Item)))
+                return resolve(validationError('no cake with the requested id'))
+            else return resolve({
+                statusCode: 200,
+                body: JSON.stringify(data.Item),
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Credentials': true,
+                }
+            })
         })
     })
 }

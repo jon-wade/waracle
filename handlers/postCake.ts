@@ -1,7 +1,7 @@
 import { Handler, APIGatewayProxyEvent } from 'aws-lambda'
 import { Cake } from '../types'
 import { validationError, created, internalError } from '../helpers/responses'
-import { getClient } from '../config/db'
+import * as dc from '../config/db'
 import { getNameCheckParams } from '../helpers/getNameCheckParams'
 
 const postCake: Handler = async (event: APIGatewayProxyEvent) => {
@@ -53,7 +53,7 @@ const postCake: Handler = async (event: APIGatewayProxyEvent) => {
     }
 
     const now = new Date().toISOString()
-    const db = getClient()
+    const db = dc.getClient()
 
     const putParams = {
         TableName: 'data',
@@ -70,6 +70,15 @@ const postCake: Handler = async (event: APIGatewayProxyEvent) => {
     const queryParams = getNameCheckParams(name)
 
     return new Promise((resolve) => {
+        const createCake = () => {
+            return db.put(putParams, (err) => {
+                if (err && err.statusCode === 400)
+                    return resolve(validationError('record already exists'))
+                else if (err) return resolve(internalError(err.message))
+                else return resolve(created())
+            })
+        }
+
         return db.query(queryParams, (err, data) => {
             if (err) return resolve(internalError(err.message))
             if (data.Items && data.Items.length) {
@@ -81,24 +90,10 @@ const postCake: Handler = async (event: APIGatewayProxyEvent) => {
                     )
                 if (data.Items[0].id !== id)
                     return resolve(
-                        validationError(
-                            'a cake with this name already exists'
-                        )
+                        validationError('a cake with this name already exists')
                     )
-                return db.put(putParams, (err) => {
-                    if (err && err.statusCode === 400)
-                        return resolve(validationError('record already exists'))
-                    else if (err) return resolve(internalError(err.message))
-                    else return resolve(created())
-                })
-            } else {
-                return db.put(putParams, (err) => {
-                    if (err && err.statusCode === 400)
-                        return resolve(validationError('record already exists'))
-                    else if (err) return resolve(internalError(err.message))
-                    else return resolve(created())
-                })
-            }
+                return createCake()
+            } else return createCake()
         })
     })
 }

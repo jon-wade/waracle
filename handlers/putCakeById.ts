@@ -58,6 +58,8 @@ const putCakeById: Handler = async (event: APIGatewayProxyEvent) => {
         updatePropertyArr.push(['imageUrl', imageUrl])
     }
 
+    if (!updatePropertyArr.length) return validationError('no properties passed in to update')
+
     // check if a cake with the proposed name already exists in the db before
     // attempting the update
     const queryParams = getNameCheckParams(name);
@@ -103,7 +105,18 @@ const putCakeById: Handler = async (event: APIGatewayProxyEvent) => {
         ConditionExpression: 'attribute_exists(id)'
     }
 
+    console.log('updateParams', updateParams)
+
     return new Promise((resolve) => {
+        const updateCake = () => {
+            return db.update(updateParams, (err) => {
+                if (err && err.statusCode === 400)
+                    resolve(validationError('no matching record exists'))
+                else if (err) return resolve(internalError(err.message))
+                return resolve(success())
+            })
+        }
+
         const db = getClient()
         if (name) {
             return db.query(queryParams, (err, data) => {
@@ -121,25 +134,10 @@ const putCakeById: Handler = async (event: APIGatewayProxyEvent) => {
                                 'a cake with this name already exists'
                             )
                         )
-                    return db.update(updateParams, (err) => {
-                        if (err && err.statusCode === 400)
-                            return resolve(
-                                validationError('no matching record exists')
-                            )
-                        else if (err) return resolve(internalError(err.message))
-                        return resolve(success())
-                    })
-                }
+                    return updateCake()
+                } else return updateCake()
             })
-        } else {
-            // we don't need to check the name in this case
-            return db.update(updateParams, (err) => {
-                if (err && err.statusCode === 400)
-                    resolve(validationError('no matching record exists'))
-                else if (err) return resolve(internalError(err.message))
-                return resolve(success())
-            })
-        }
+        } else return updateCake()
     })
 }
 
